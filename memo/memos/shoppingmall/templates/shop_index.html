@@ -11,6 +11,7 @@
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
         integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
         crossorigin="anonymous"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
         integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
         crossorigin="anonymous"></script>
@@ -52,36 +53,101 @@
         }
     </style>
     <script>
+        $(document).ready(function () {
+            $('#add_or').html('');
+            listing();
+        });
 
         function order() {
+            let name = $('#input_name').val();
+            let quantity = $('#input_quan').val();
+            let address = $('#input_address').val();
+            let phone = $('#input_phone').val();
 
-            if ($('#input_name').val() == "") {
+            if (name == "") {
                 alert('이름을 입력하세요');
                 $('#input_name').focus();
+                return;
             }
-            else if ($('#input_quan').val() == "수량을 입력하시오") {
+            else if (quantity == "수량을 입력하시오") {
                 alert('수량을 입력하세요');
                 $('#input_quan').focus();
+                return;
             }
-            else if ($('#input_address').val() == "") {
+            else if (address == "") {
                 alert('주소를 입력하세요');
                 $('#input_address').focus();
+                return;
             }
-            else if ($('#input_phone').val() == "") {
+            else if (phone == "") {
                 alert('휴대폰 번호를 입력하세요');
                 $('#input_phone').focus();
+                return;
             }
 
-            else {
-                $('#add_or').append(`<tr>
-            <td>${$('#input_name').val()}</td>
-            <td>${$('#input_quan').val()}</td>
-            <td>${$('#input_address').val()}</td>
-            <td>${$('#input_phone').val()}</td>
-          </tr>`)
+
+            
+
+            let give_data = { 'name_give': name, 'quantity_give': quantity, 'address_give': address, 'phone_give': phone };
+
+            $.ajax({
+                type: "POST",
+                url: "/orders",
+                data: give_data,
+                success: function (response) {
+                    if (response['result'] == 'success') {
+                        alert(response['msg']);
+                        window.location.reload();
+                    }
+
+                }
+            });
+        }
 
 
-            }
+        function listing() {
+            $.ajax({
+                type: "GET",
+                url: "/orders",
+                data: {},
+                success: function (response) {
+
+                    if (response['result'] == 'success') {
+
+                        let orders = response['orders']
+
+                        for (let i = 0; i < orders.length; i++) {
+
+                            let order = orders[i];
+                            let name = order['name'];
+                            let quantity = order['quantity'];
+                            let address = order['address'];
+                            let phone = order['phone'];
+
+                            make_table(name, quantity, address, phone);
+                        }
+
+
+                    }
+                    else{
+                        alert('load fail');
+                    }
+                }
+            });
+
+        }
+
+        function make_table(name, quan, addr, phone){
+                let temp_html = `<tr>
+                <td>${name}</td>
+                <td>${quan}</td>
+                <td>${addr}</td>
+                <td>${phone}</td>
+              </tr>`
+
+                $('#add_or').append(temp_html);
+
+                console.log('메이크 테이블');
 
         }
 
